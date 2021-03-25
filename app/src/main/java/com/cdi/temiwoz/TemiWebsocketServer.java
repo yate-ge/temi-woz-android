@@ -56,15 +56,21 @@ public class TemiWebsocketServer extends WebSocketServer {
         try {
             JSONObject cmd = new JSONObject(message);
 
-            if (cmd.getString("cmd").equals("speak")) {
-                robot.speak(cmd.getString("sentence"));
+            if (cmd.getString("command").equals("speak")) {
+                robot.speak(cmd.getString("sentence"), cmd.getString("id"));
                 broadcast( message );
 
-            } else if (cmd.getString("cmd").equals("ask")) {
-                robot.askQuestion(cmd.getString("sentence"));
+            } else if (cmd.getString("command").equals("ask")) {
+                robot.askQuestion(cmd.getString("sentence"), cmd.getString("id"));
 
-            } else if (cmd.getString("cmd").equals("goto")) {
-                robot.gotoLocation(cmd.getString("location"));
+            } else if (cmd.getString("command").equals("goto")) {
+                robot.gotoLocation(cmd.getString("location"), cmd.getString("id"));
+
+            } else if (cmd.getString("command").equals("tilt")) {
+                robot.tiltAngle(cmd.getInt("angle"), cmd.getString("id"));
+
+            }else if (cmd.getString("command").equals("turn")) {
+                robot.turnBy(cmd.getInt("angle"), cmd.getString("id"));
 
             }
 
