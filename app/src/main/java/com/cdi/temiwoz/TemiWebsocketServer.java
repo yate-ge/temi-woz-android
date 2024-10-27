@@ -67,17 +67,17 @@ public class TemiWebsocketServer extends WebSocketServer {
 
 
             switch (cmd.getString("command")) {
-                case "openURL":
-                    activity.runOnUiThread(new Runnable() {
-                        public void run() {
-                            try {
-                                activity.setInterfaceUrl(cmd.getString("url"));
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    });
-                    break;
+//                case "openURL":
+//                    activity.runOnUiThread(new Runnable() {
+//                        public void run() {
+//                            try {
+//                                activity.setInterfaceUrl(cmd.getString("url"));
+//                            } catch (JSONException e) {
+//                                e.printStackTrace();
+//                            }
+//                        }
+//                    });
+//                    break;
                 case "speak":
                     robot.speak(cmd.getString("sentence"), cmd.getString("id"));
                     //conn.send("msg:" + message);
