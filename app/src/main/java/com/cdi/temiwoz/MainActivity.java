@@ -13,6 +13,9 @@ import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.View;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
 import android.widget.FrameLayout;
 import android.widget.Toast;
 
@@ -32,6 +35,7 @@ public class MainActivity extends AppCompatActivity implements OnRobotReadyListe
     private SurfaceView surfaceView;
     private SurfaceHolder surfaceHolder;
     TemiWebsocketServer server;
+    private WebView webView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,17 +43,21 @@ public class MainActivity extends AppCompatActivity implements OnRobotReadyListe
         setContentView(R.layout.activity_main);
         Log.d(TAG, "onCreate: Starting application");
 
-        // 检查摄像头权限
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-            Log.d(TAG, "onCreate: Requesting camera permission");
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, 1);
-        } else {
-            Log.d(TAG, "onCreate: Camera permission already granted");
-            initializeCamera();
-        }
+        // 初始化WebView
+        webView = findViewById(R.id.webview);
+        WebSettings webSettings = webView.getSettings();
+        webSettings.setJavaScriptEnabled(true);
+        webView.loadUrl("https://www.baidu.com");
+        
+        // 摄像头相关初始化代码保留但默认不启动
+        surfaceView = findViewById(R.id.camera_preview);
+        surfaceView.setVisibility(View.GONE); // 默认隐藏摄像头预览
+        surfaceHolder = surfaceView.getHolder();
+        surfaceHolder.addCallback(this);
 
         robot = Robot.getInstance();
-        robotApi = new RobotApi(robot);
+        robotApi = new RobotApi(robot, this);// 传入MainActivity实例
+        robotApi.setSurfaceHolder(surfaceHolder);
     }
 
     @Override
@@ -72,7 +80,7 @@ public class MainActivity extends AppCompatActivity implements OnRobotReadyListe
         surfaceHolder = surfaceView.getHolder();
         surfaceHolder.addCallback(this);
     }
-
+    
     @Override
     protected void onResume() {
         super.onResume();
@@ -130,6 +138,9 @@ public class MainActivity extends AppCompatActivity implements OnRobotReadyListe
         }
     }
 
+    ////////////////////////////////////////////////////////////////
+    // SurfaceHolder.Callback
+    ////////////////////////////////////////////////////////////////
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
         Log.d(TAG, "surfaceCreated: Surface created");
@@ -161,9 +172,9 @@ public class MainActivity extends AppCompatActivity implements OnRobotReadyListe
             // 设置摄像头方向
             setCameraDisplayOrientation();
             
-            camera.setParameters(parameters);
-            camera.setPreviewDisplay(surfaceHolder);
-            camera.startPreview();
+            camera.setParameters(parameters);//设置摄像头参数   
+            camera.setPreviewDisplay(surfaceHolder);//设置预览显示
+            camera.startPreview();//开始预览
             Log.d(TAG, "surfaceChanged: Camera preview started");
         } catch (Exception e) {
             Log.e(TAG, "surfaceChanged: Error starting camera preview", e);
@@ -172,7 +183,7 @@ public class MainActivity extends AppCompatActivity implements OnRobotReadyListe
 
     private Camera.Size getBestPreviewSize(int width, int height, Camera.Parameters parameters) {
         Camera.Size bestSize = null;
-        List<Camera.Size> sizeList = parameters.getSupportedPreviewSizes();
+        List<Camera.Size> sizeList = parameters.getSupportedPreviewSizes();//获取支持的预览尺寸
         bestSize = sizeList.get(0);
         for(int i = 1; i < sizeList.size(); i++){
             if((sizeList.get(i).width * sizeList.get(i).height) > (bestSize.width * bestSize.height)){
@@ -243,5 +254,18 @@ public class MainActivity extends AppCompatActivity implements OnRobotReadyListe
         }
         camera.setDisplayOrientation(result);
         Log.d(TAG, "setCameraDisplayOrientation: Camera orientation set to " + result + " degrees");
+    }
+
+    // 添加切换显示的方法
+    public void showCamera() {
+        webView.setVisibility(View.GONE);
+        surfaceView.setVisibility(View.VISIBLE);
+        initializeCamera();
+    }
+
+    public void showWebView() {
+        surfaceView.setVisibility(View.GONE);
+        webView.setVisibility(View.VISIBLE);
+        stopCamera();
     }
 }

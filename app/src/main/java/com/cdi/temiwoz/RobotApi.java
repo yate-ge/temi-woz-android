@@ -1,7 +1,10 @@
 package com.cdi.temiwoz;
 
 import android.content.pm.PackageManager;
-
+import android.hardware.Camera;
+import android.view.SurfaceHolder;
+import android.util.Log;
+import java.io.IOException;
 
 import com.robotemi.sdk.Robot;
 import com.robotemi.sdk.TtsRequest;
@@ -50,9 +53,15 @@ public class RobotApi implements TtsListener,
     String getContact_id;
     String call_id;
 
+    private static final String TAG = "RobotApi";
+    private Camera camera;
+    private SurfaceHolder surfaceHolder;
 
-    RobotApi (Robot robotInstance) {
-        robot = robotInstance;
+    private MainActivity activity;
+
+    RobotApi (Robot robotInstance, MainActivity activity) {
+        this.robot = robotInstance;
+        this.activity = activity;
         robot.addTtsListener(this);
         robot.addAsrListener(this);
         robot.addOnGoToLocationStatusChangedListener(this);
@@ -300,8 +309,53 @@ public class RobotApi implements TtsListener,
     }
 
     public void stop() {
+        stopCamera(null); // 关闭摄像头
         //robot.removeTtsListener(this);
         //robot.removeAsrListener(this);
         //robot.removeOnGoToLocationStatusChangedListener(this);
+    }
+
+    public void setSurfaceHolder(SurfaceHolder holder) {
+        this.surfaceHolder = holder;
+    }
+
+    public void startCamera(String id) {
+        if (activity != null) {
+            activity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    activity.showCamera();
+                }
+            });
+            try {
+                server.broadcast(new JSONObject()
+                        .put("event", "cameraStarted")
+                        .put("id", id)
+                        .put("success", true)
+                        .toString());
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public void stopCamera(String id) {
+        if (activity != null) {
+            activity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    activity.showWebView();
+                }
+            });
+            try {
+                server.broadcast(new JSONObject()
+                        .put("event", "cameraStopped")
+                        .put("id", id)
+                        .put("success", true)
+                        .toString());
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

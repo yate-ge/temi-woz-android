@@ -128,6 +128,12 @@ public class TemiWebsocketServer extends WebSocketServer {
                 case "constraintBeWith":
                     robot.constraintBeWith();
                     break;
+                case "startCamera":
+                    robot.startCamera(cmd.getString("id"));
+                    break;
+                case "stopCamera":
+                    robot.stopCamera(cmd.getString("id"));
+                    break;
                 default:
                     System.out.println("Invalid command");
             }

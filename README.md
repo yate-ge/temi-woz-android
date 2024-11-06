@@ -105,7 +105,7 @@ All commands are sent as JSON objects. Here are the supported robot commands:
 {
   "command": "speak",
   "sentence": "The sentence you want Temi to say",
-  "id": "unique_command_id"  // Optional: for tracking command completion
+  "id": "unique_command_id"  
 }
 ```
 - Description: Makes Temi speak the given sentence
@@ -116,7 +116,7 @@ All commands are sent as JSON objects. Here are the supported robot commands:
 {
   "command": "ask",
   "sentence": "The question you want Temi to ask",
-  "id": "unique_command_id"  // Optional: for tracking command completion
+  "id": "unique_command_id"  
 }
 ```
 - Description: Makes Temi ask a question and wait for user's response
@@ -127,9 +127,10 @@ All commands are sent as JSON objects. Here are the supported robot commands:
 {
   "command": "goto",
   "location": "The exact name of the location as set in Temi",
-  "id": "unique_command_id"  // Optional: for tracking command completion
+  "id": "unique_command_id"  
 }
 ```
+// id Optional: for tracking command completion
 - Description: Commands Temi to navigate to a pre-defined location
 - Returns: Navigation status updates
 
@@ -138,7 +139,7 @@ All commands are sent as JSON objects. Here are the supported robot commands:
 {
   "command": "interface",
   "url": "URL_TO_LOAD",
-  "id": "unique_command_id"  // Optional: for tracking command completion
+  "id": "unique_command_id" 
 }
 ```
 - Description: Loads a web interface on Temi's screen
