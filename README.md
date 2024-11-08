@@ -111,7 +111,14 @@ All commands are sent as JSON objects. Here are the supported robot commands:
 }
 ```
 - Description: Makes Temi speak the given sentence
-- WebSocket Response: `{"command":"speak", "id":"unique_command_id", "status":"completed"}`
+- WebSocket Response: 
+```json
+{
+  "command": "speak",
+  "id": "unique_command_id",
+  "status": "completed"
+}
+```
 
 #### Ask Question Command
 ```json
@@ -122,7 +129,15 @@ All commands are sent as JSON objects. Here are the supported robot commands:
 }
 ```
 - Description: Makes Temi ask a question and wait for user's response
-- WebSocket Response: `{"command":"ask", "id":"unique_command_id", "response":"user's answer here"}`
+- WebSocket Response: 
+```json
+{
+  "command": "ask",
+  "id": "unique_command_id",
+  "reply": "用户回答的文本",
+  "status": "completed"
+}
+```
 
 ### Movement Commands
 
@@ -136,8 +151,14 @@ All commands are sent as JSON objects. Here are the supported robot commands:
 ```
 - Description: Commands Temi to navigate to a pre-defined location
 - WebSocket Response: 
-  - Success: `{"command":"goto", "id":"unique_command_id", "status":"completed", "location":"kitchen"}`
-  - Failure: `{"command":"goto", "id":"unique_command_id", "status":"failed", "error":"Path blocked"}`
+```json
+{
+  "command": "goto",
+  "id": "unique_command_id",
+  "status": "completed",
+  "location": "location_name"
+}
+```
 
 #### Move Command
 ```json
@@ -162,6 +183,35 @@ All commands are sent as JSON objects. Here are the supported robot commands:
   - New movement commands will update the current movement velocity
   - Basic obstacle avoidance is handled by Temi's built-in safety features
 
+- WebSocket Response: 
+  - Start moving:
+  ```json
+  {
+    "command": "move",
+    "status": "started",
+    "x": 0.5,
+    "y": 0.5
+  }
+  ```
+  - Update movement:
+  ```json
+  {
+    "command": "move",
+    "status": "updated",
+    "x": 0.7,
+    "y": 0.3
+  }
+  ```
+  - Stop moving:
+  ```json
+  {
+    "command": "move",
+    "status": "stopped",
+    "x": 0,
+    "y": 0
+  }
+  ```
+
 #### Stop Movement Command
 ```json
 {
@@ -181,7 +231,14 @@ All commands are sent as JSON objects. Here are the supported robot commands:
 }
 ```
 - Description: Turns robot by specified angle (degrees, positive=right, negative=left)
-- WebSocket Response: `{"command":"turn", "id":"unique_command_id", "status":"completed"}`
+- WebSocket Response: 
+```json
+{
+  "command": "turn",
+  "id": "unique_command_id",
+  "status": "completed"
+}
+```
 
 #### Tilt Command
 ```json
@@ -192,7 +249,15 @@ All commands are sent as JSON objects. Here are the supported robot commands:
 }
 ```
 - Description: Tilts robot's head by specified angle (degrees, positive=up, negative=down)
-- WebSocket Response: `{"command":"tilt", "id":"unique_command_id", "status":"completed"}`
+- WebSocket Response: 
+```json
+{
+  "command": "tilt",
+  "id": "unique_command_id",
+  "angle": 45,
+  "status": "completed"
+}
+```
 
 ### Following Commands
 
@@ -227,7 +292,15 @@ All commands are sent as JSON objects. Here are the supported robot commands:
 }
 ```
 - Description: Saves current position as a named location
-- WebSocket Response: `{"command":"saveLocation", "id":"unique_command_id", "status":"saved"}`
+- WebSocket Response: 
+```json
+{
+  "command": "saveLocation",
+  "id": "unique_command_id",
+  "status": "completed/failed",
+  "location": "kitchen"
+}
+```
 
 #### Delete Location Command
 ```json
@@ -238,7 +311,15 @@ All commands are sent as JSON objects. Here are the supported robot commands:
 }
 ```
 - Description: Deletes a saved location
-- WebSocket Response: `{"command":"deleteLocation", "id":"unique_command_id", "status":"deleted"}`
+- WebSocket Response: 
+```json
+{
+  "command": "deleteLocation",
+  "id": "unique_command_id",
+  "status": "completed/failed",
+  "location": "kitchen"
+}
+```
 
 ### Camera Commands
 
@@ -283,7 +364,15 @@ All commands are sent as JSON objects. Here are the supported robot commands:
 }
 ```
 - Description: Enables or disables detection mode
-- WebSocket Response: `{"command":"setDetectionMode", "id":"unique_command_id", "status":"set"}`
+- WebSocket Response: 
+```json
+{
+  "command": "setDetectionMode",
+  "id": "unique_command_id",
+  "status": "completed",
+  "isOn": true
+}
+```
 
 #### Check Detection Mode Command
 ```json
@@ -293,7 +382,15 @@ All commands are sent as JSON objects. Here are the supported robot commands:
 }
 ```
 - Description: Checks if detection mode is enabled
-- WebSocket Response: `{"command":"checkDetectionMode", "id":"unique_command_id", "enabled":true}`
+- WebSocket Response: 
+```json
+{
+  "command": "checkDetectionMode",
+  "id": "unique_command_id",
+  "status": "completed",
+  "isOn": true
+}
+```
 
 #### Set Track User Command
 ```json

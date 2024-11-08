@@ -270,7 +270,11 @@ public class RobotApi implements TtsListener,
     public void onTtsStatusChanged(TtsRequest ttsRequest) {
         if (ttsRequest.getStatus() == TtsRequest.Status.COMPLETED) {
             try {
-                server.broadcast(new JSONObject().put("id", speak_id).toString());
+                server.broadcast(new JSONObject()
+                    .put("command", "speak")
+                    .put("id", speak_id)
+                    .put("status", "completed")
+                    .toString());
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -281,7 +285,12 @@ public class RobotApi implements TtsListener,
     public void onGoToLocationStatusChanged(@NotNull String location, @GoToLocationStatus String status, int descriptionId, String description) {
         if (status.equals("complete")) {
             try {
-                server.broadcast(new JSONObject().put("id", goto_id).toString());
+                server.broadcast(new JSONObject()
+                    .put("command", "goto")
+                    .put("id", goto_id)
+                    .put("status", "completed")
+                    .put("location", location)
+                    .toString());
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -299,7 +308,11 @@ public class RobotApi implements TtsListener,
     public void onMovementStatusChanged(@NotNull String type, String status){
         if(status.equals("complete")){
             try {
-                server.broadcast(new JSONObject().put("id", turn_id).toString());
+                server.broadcast(new JSONObject()
+                    .put("command", "turn")
+                    .put("id", turn_id)
+                    .put("status", "completed")
+                    .toString());
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -310,7 +323,12 @@ public class RobotApi implements TtsListener,
     @Override
     public void onAsrResult(@NotNull String text) {
         try {
-            server.broadcast(new JSONObject().put("id", ask_id).put("reply",text).toString());
+            server.broadcast(new JSONObject()
+                .put("command", "ask")
+                .put("id", ask_id)
+                .put("reply", text)
+                .put("status", "completed")
+                .toString());
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -504,25 +522,56 @@ public class RobotApi implements TtsListener,
         // 如果收到(0,0)，则停止移动
         if (x == 0 && y == 0) {
             stopMoving();
+            try {
+                server.broadcast(new JSONObject()
+                    .put("command", "move")
+                    .put("status", "stopped")
+                    .put("x", 0)
+                    .put("y", 0)
+                    .toString());
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
             return;
         }
 
         currentX = x;
         currentY = y;
 
-        // 如果已经在移动，不需要创建新线程
+        // 如果已经在移动，只更新速度值
         if (isMoving) {
+            try {
+                server.broadcast(new JSONObject()
+                    .put("command", "move")
+                    .put("status", "updated")
+                    .put("x", currentX)
+                    .put("y", currentY)
+                    .toString());
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
             return;
         }
 
         // 开始持续移动
         isMoving = true;
+        try {
+            server.broadcast(new JSONObject()
+                .put("command", "move")
+                .put("status", "started")
+                .put("x", currentX)
+                .put("y", currentY)
+                .toString());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
         movementThread = new Thread(new Runnable() {
             @Override
             public void run() {
                 while (isMoving) {
                     if (robot != null) {
-                        robot.skidJoy(currentX, currentY); // 移除 smart 参数
+                        robot.skidJoy(currentX, currentY);
                     }
                     try {
                         Thread.sleep(MOVEMENT_INTERVAL);
@@ -541,11 +590,21 @@ public class RobotApi implements TtsListener,
     private void stopMoving() {
         isMoving = false;
         if (robot != null) {
-            robot.skidJoy(0, 0); // 移除 smart 参数
+            robot.skidJoy(0, 0);
         }
         if (movementThread != null) {
             movementThread.interrupt();
             movementThread = null;
+        }
+        try {
+            server.broadcast(new JSONObject()
+                .put("command", "move")
+                .put("status", "stopped")
+                .put("x", 0)
+                .put("y", 0)
+                .toString());
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
     }
 
