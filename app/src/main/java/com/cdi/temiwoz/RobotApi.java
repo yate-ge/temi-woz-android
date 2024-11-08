@@ -358,4 +358,28 @@ public class RobotApi implements TtsListener,
             }
         }
     }
+
+    // 添加拍照完成后的 WebSocket 通知
+    public void notifyPictureTaken(String filePath) {
+        try {
+            server.broadcast(new JSONObject()
+                    .put("event", "pictureTaken")
+                    .put("filePath", filePath)
+                    .toString());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // 添加录像完成后的 WebSocket 通知
+    public void notifyRecordingStopped(String filePath) {
+        try {
+            server.broadcast(new JSONObject()
+                    .put("event", "recordingStopped")
+                    .put("filePath", filePath)
+                    .toString());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
 }

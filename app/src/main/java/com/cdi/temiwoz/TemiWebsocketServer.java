@@ -134,6 +134,30 @@ public class TemiWebsocketServer extends WebSocketServer {
                 case "stopCamera":
                     robot.stopCamera(cmd.getString("id"));
                     break;
+                case "takePicture":
+                    activity.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            activity.takePicture();
+                        }
+                    });
+                    break;
+                case "startRecording":
+                    activity.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            activity.startRecording();
+                        }
+                    });
+                    break;
+                case "stopRecording":
+                    activity.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            activity.stopRecording();
+                        }
+                    });
+                    break;
                 default:
                     System.out.println("Invalid command");
             }
