@@ -100,6 +100,8 @@ Upon successful connection, you'll receive: "Temi is ready to receive commands!"
 
 All commands are sent as JSON objects. Here are the supported robot commands:
 
+### Basic Communication Commands
+
 #### Speaking Command
 ```json
 {
@@ -122,6 +124,8 @@ All commands are sent as JSON objects. Here are the supported robot commands:
 - Description: Makes Temi ask a question and wait for user's response
 - WebSocket Response: `{"command":"ask", "id":"unique_command_id", "response":"user's answer here"}`
 
+### Movement Commands
+
 #### Go to Location Command
 ```json
 {
@@ -135,6 +139,187 @@ All commands are sent as JSON objects. Here are the supported robot commands:
   - Success: `{"command":"goto", "id":"unique_command_id", "status":"completed", "location":"kitchen"}`
   - Failure: `{"command":"goto", "id":"unique_command_id", "status":"failed", "error":"Path blocked"}`
 
+#### Stop Movement Command
+```json
+{
+  "command": "stopMovement",
+  "id": "unique_command_id"
+}
+```
+- Description: Stops any current movement
+- WebSocket Response: `{"command":"stopMovement", "id":"unique_command_id", "status":"stopped"}`
+
+#### Turn By Command
+```json
+{
+  "command": "turn",
+  "angle": 90,
+  "id": "unique_command_id"
+}
+```
+- Description: Turns robot by specified angle (degrees, positive=right, negative=left)
+- WebSocket Response: `{"command":"turn", "id":"unique_command_id", "status":"completed"}`
+
+#### Tilt Command
+```json
+{
+  "command": "tilt",
+  "angle": 45,
+  "id": "unique_command_id"
+}
+```
+- Description: Tilts robot's head by specified angle (degrees, positive=up, negative=down)
+- WebSocket Response: `{"command":"tilt", "id":"unique_command_id", "status":"completed"}`
+
+### Following Commands
+
+#### Be With Me Command
+```json
+{
+  "command": "beWithMe",
+  "id": "unique_command_id"
+}
+```
+- Description: Makes robot follow the user
+- WebSocket Response: `{"command":"beWithMe", "id":"unique_command_id", "status":"following"}`
+
+#### Constraint Be With Command
+```json
+{
+  "command": "constraintBeWith",
+  "id": "unique_command_id"
+}
+```
+- Description: Makes robot follow with constraints
+- WebSocket Response: `{"command":"constraintBeWith", "id":"unique_command_id", "status":"following"}`
+
+### Location Management Commands
+
+#### Save Location Command
+```json
+{
+  "command": "saveLocation",
+  "locationName": "kitchen",
+  "id": "unique_command_id"
+}
+```
+- Description: Saves current position as a named location
+- WebSocket Response: `{"command":"saveLocation", "id":"unique_command_id", "status":"saved"}`
+
+#### Delete Location Command
+```json
+{
+  "command": "deleteLocation",
+  "locationName": "kitchen",
+  "id": "unique_command_id"
+}
+```
+- Description: Deletes a saved location
+- WebSocket Response: `{"command":"deleteLocation", "id":"unique_command_id", "status":"deleted"}`
+
+### Camera Commands
+
+#### Camera Control Commands
+```json
+{
+  "command": "startCamera",  // or "stopCamera", "showCameraPreview", "hideCameraPreview"
+  "id": "unique_command_id"
+}
+```
+- Description: Controls camera operations
+- WebSocket Response: `{"command":"startCamera", "id":"unique_command_id", "status":"started"}`
+
+#### Take Picture Command
+```json
+{
+  "command": "takePicture",
+  "id": "unique_command_id"
+}
+```
+- Description: Takes a picture using robot's camera
+- WebSocket Response: `{"command":"takePicture", "id":"unique_command_id", "image":"base64_encoded_image"}`
+
+#### Recording Commands
+```json
+{
+  "command": "startRecording",  // or "stopRecording"
+  "id": "unique_command_id"
+}
+```
+- Description: Controls video recording
+- WebSocket Response: `{"command":"startRecording", "id":"unique_command_id", "status":"started"}`
+
+### Detection and Tracking Commands
+
+#### Set Detection Mode Command
+```json
+{
+  "command": "setDetectionMode",
+  "on": true,
+  "id": "unique_command_id"
+}
+```
+- Description: Enables or disables detection mode
+- WebSocket Response: `{"command":"setDetectionMode", "id":"unique_command_id", "status":"set"}`
+
+#### Check Detection Mode Command
+```json
+{
+  "command": "checkDetectionMode",
+  "id": "unique_command_id"
+}
+```
+- Description: Checks if detection mode is enabled
+- WebSocket Response: `{"command":"checkDetectionMode", "id":"unique_command_id", "enabled":true}`
+
+#### Set Track User Command
+```json
+{
+  "command": "setTrackUserOn",
+  "on": true,
+  "id": "unique_command_id"
+}
+```
+- Description: Enables or disables user tracking
+- WebSocket Response: `{"command":"setTrackUserOn", "id":"unique_command_id", "status":"set"}`
+
+### System Commands
+
+#### Wake Up Command
+```json
+{
+  "command": "wakeup",
+  "id": "unique_command_id"
+}
+```
+- Description: Wakes up the robot from sleep mode
+- WebSocket Response: `{"command":"wakeup", "id":"unique_command_id", "status":"completed"}`
+
+### Communication Commands
+
+#### Get Contact Command
+```json
+{
+  "command": "getContact",
+  "id": "unique_command_id"
+}
+```
+- Description: Gets the contact list from Temi
+- WebSocket Response: `{"command":"getContact", "id":"unique_command_id", "contacts":[...]}`
+
+#### Call Command
+```json
+{
+  "command": "call",
+  "userId": "user_id_to_call",
+  "id": "unique_command_id"
+}
+```
+- Description: Initiates a call to specified user
+- WebSocket Response: `{"command":"call", "id":"unique_command_id", "status":"initiated"}`
+
+### Interface Commands
+
 #### Load Interface Command
 ```json
 {
@@ -146,105 +331,14 @@ All commands are sent as JSON objects. Here are the supported robot commands:
 - Description: Loads a web interface on Temi's screen
 - WebSocket Response: `{"command":"interface", "id":"unique_command_id", "status":"loaded"}`
 
-#### Stop Command
-```json
-{
-  "command": "stop",
-  "id": "unique_command_id"
-}
-```
-- Description: Stops any current movement or action
-- Returns: `STOP_COMPLETED`
-
-#### Turn By Command
-```json
-{
-  "command": "turnBy",
-  "angle": 90,
-  "id": "unique_command_id"
-}
-```
-- Description: Turns robot by specified angle (degrees, positive=right, negative=left)
-- Returns: `TURN_COMPLETED` or `TURN_ABORTED/error_message`
-
-#### Tilt By Command
-```json
-{
-  "command": "tiltBy",
-  "angle": 45,
-  "id": "unique_command_id"
-}
-```
-- Description: Tilts robot's head by specified angle (degrees, positive=up, negative=down)
-- Returns: `TILT_COMPLETED` or `TILT_ABORTED/error_message`
-
-#### Follow Command
-```json
-{
-  "command": "follow",
-  "action": "start",  // or "stop"
-  "id": "unique_command_id"
-}
-```
-- Description: Starts or stops following mode
-- Returns: `FOLLOW_STARTED`, `FOLLOW_STOPPED`, or `FOLLOW_TARGET_LOST`
-
-#### Get Locations Command
-```json
-{
-  "command": "getLocations",
-  "id": "unique_command_id"
-}
-```
-- Description: Gets list of all saved locations
-- Returns: `LOCATIONS_LIST/{"locations":["location1","location2",...]}`
-
-#### Take Photo Command
-```json
-{
-  "command": "takePhoto",
-  "id": "unique_command_id"
-}
-```
-- Description: Takes a photo using Temi's camera
-- Returns: `PHOTO_TAKEN/base64_image_data` or `PHOTO_FAILED/error_message`
-
-#### Start Video Stream Command
-```json
-{
-  "command": "startVideo",
-  "id": "unique_command_id"
-}
-```
-- Description: Starts video streaming from Temi's camera
-- Returns: `VIDEO_STARTED` followed by binary video frames, or `VIDEO_ERROR/error_message`
-
-#### Stop Video Stream Command
-```json
-{
-  "command": "stopVideo",
-  "id": "unique_command_id"
-}
-```
-- Description: Stops the video stream
-- Returns: `VIDEO_STOPPED`
-
-#### Get Battery Status Command
-```json
-{
-  "command": "getBattery",
-  "id": "unique_command_id"
-}
-```
-- Description: Gets current battery status
-- Returns: `BATTERY_STATUS/{"level":85,"is_charging":false}`
-
 ### Using Node-RED
 
-1. [Install Node-RED](https://nodered.org/docs/getting-started/local)
-2. Import our custom nodes from [this JSON file](https://gist.github.com/shaunabanana/1c70946826b08cb46c49c8e8b105a726)
-3. Configure the nodes with your Temi's IP address
-4. Start building your control flows!
+~~1. [Install Node-RED](https://nodered.org/docs/getting-started/local)~~
+~~2. Import our custom nodes from [this JSON file](https://gist.github.com/shaunabanana/1c70946826b08cb46c49c8e8b105a726)~~
+~~3. Configure the nodes with your Temi's IP address~~
+~~4. Start building your control flows!~~
+
+To be updated
 
 ## Contributing
 
