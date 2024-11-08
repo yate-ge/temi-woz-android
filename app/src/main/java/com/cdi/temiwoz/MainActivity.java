@@ -80,7 +80,8 @@ public class MainActivity extends AppCompatActivity implements OnRobotReadyListe
         webView = findViewById(R.id.webview);
         WebSettings webSettings = webView.getSettings();
         webSettings.setJavaScriptEnabled(true);
-        webView.loadUrl("https://www.baidu.com");
+        // 修改这行，加载本地资源
+        webView.loadUrl("file:///android_asset/web/index.html");
         
         // 摄像头相关初始化代码保留但默认不启动
         surfaceView = findViewById(R.id.camera_preview);
@@ -238,7 +239,7 @@ public class MainActivity extends AppCompatActivity implements OnRobotReadyListe
         stopCamera();
     }
 
-    private void startCamera() {
+    public void startCamera() {
         Log.d(TAG, "startCamera: Starting camera");
         if (camera == null) {
             try {
@@ -258,7 +259,7 @@ public class MainActivity extends AppCompatActivity implements OnRobotReadyListe
         }
     }
 
-    private void stopCamera() {
+    public void stopCamera() {
         Log.d(TAG, "stopCamera: Stopping camera");
         if (camera != null) {
             try {
