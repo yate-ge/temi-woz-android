@@ -109,7 +109,7 @@ All commands are sent as JSON objects. Here are the supported robot commands:
 }
 ```
 - Description: Makes Temi speak the given sentence
-- Returns: `TTS_COMPLETED/your_sentence` when speech is finished
+- WebSocket Response: `{"command":"speak", "id":"unique_command_id", "status":"completed"}`
 
 #### Ask Question Command
 ```json
@@ -120,7 +120,7 @@ All commands are sent as JSON objects. Here are the supported robot commands:
 }
 ```
 - Description: Makes Temi ask a question and wait for user's response
-- Returns: `ASR_COMPLETED/user_response` when user answers
+- WebSocket Response: `{"command":"ask", "id":"unique_command_id", "response":"user's answer here"}`
 
 #### Go to Location Command
 ```json
@@ -130,9 +130,10 @@ All commands are sent as JSON objects. Here are the supported robot commands:
   "id": "unique_command_id"  
 }
 ```
-// id Optional: for tracking command completion
 - Description: Commands Temi to navigate to a pre-defined location
-- Returns: Navigation status updates
+- WebSocket Response: 
+  - Success: `{"command":"goto", "id":"unique_command_id", "status":"completed", "location":"kitchen"}`
+  - Failure: `{"command":"goto", "id":"unique_command_id", "status":"failed", "error":"Path blocked"}`
 
 #### Load Interface Command
 ```json
@@ -143,8 +144,100 @@ All commands are sent as JSON objects. Here are the supported robot commands:
 }
 ```
 - Description: Loads a web interface on Temi's screen
+- WebSocket Response: `{"command":"interface", "id":"unique_command_id", "status":"loaded"}`
 
+#### Stop Command
+```json
+{
+  "command": "stop",
+  "id": "unique_command_id"
+}
+```
+- Description: Stops any current movement or action
+- Returns: `STOP_COMPLETED`
 
+#### Turn By Command
+```json
+{
+  "command": "turnBy",
+  "angle": 90,
+  "id": "unique_command_id"
+}
+```
+- Description: Turns robot by specified angle (degrees, positive=right, negative=left)
+- Returns: `TURN_COMPLETED` or `TURN_ABORTED/error_message`
+
+#### Tilt By Command
+```json
+{
+  "command": "tiltBy",
+  "angle": 45,
+  "id": "unique_command_id"
+}
+```
+- Description: Tilts robot's head by specified angle (degrees, positive=up, negative=down)
+- Returns: `TILT_COMPLETED` or `TILT_ABORTED/error_message`
+
+#### Follow Command
+```json
+{
+  "command": "follow",
+  "action": "start",  // or "stop"
+  "id": "unique_command_id"
+}
+```
+- Description: Starts or stops following mode
+- Returns: `FOLLOW_STARTED`, `FOLLOW_STOPPED`, or `FOLLOW_TARGET_LOST`
+
+#### Get Locations Command
+```json
+{
+  "command": "getLocations",
+  "id": "unique_command_id"
+}
+```
+- Description: Gets list of all saved locations
+- Returns: `LOCATIONS_LIST/{"locations":["location1","location2",...]}`
+
+#### Take Photo Command
+```json
+{
+  "command": "takePhoto",
+  "id": "unique_command_id"
+}
+```
+- Description: Takes a photo using Temi's camera
+- Returns: `PHOTO_TAKEN/base64_image_data` or `PHOTO_FAILED/error_message`
+
+#### Start Video Stream Command
+```json
+{
+  "command": "startVideo",
+  "id": "unique_command_id"
+}
+```
+- Description: Starts video streaming from Temi's camera
+- Returns: `VIDEO_STARTED` followed by binary video frames, or `VIDEO_ERROR/error_message`
+
+#### Stop Video Stream Command
+```json
+{
+  "command": "stopVideo",
+  "id": "unique_command_id"
+}
+```
+- Description: Stops the video stream
+- Returns: `VIDEO_STOPPED`
+
+#### Get Battery Status Command
+```json
+{
+  "command": "getBattery",
+  "id": "unique_command_id"
+}
+```
+- Description: Gets current battery status
+- Returns: `BATTERY_STATUS/{"level":85,"is_charging":false}`
 
 ### Using Node-RED
 
