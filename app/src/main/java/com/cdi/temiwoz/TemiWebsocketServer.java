@@ -166,6 +166,14 @@ public class TemiWebsocketServer extends WebSocketServer {
                         e.printStackTrace();
                     }
                     break;
+                case "move":
+                    float x = (float)cmd.getDouble("x");
+                    float y = (float)cmd.getDouble("y");
+                    System.out.println("TemiWebsocketServer: Received move command - x: " + x + ", y: " + y);
+                    x = Math.max(-1, Math.min(1, x));
+                    y = Math.max(-1, Math.min(1, y));
+                    robot.skidJoy(x, y);
+                    break;
                 default:
                     System.out.println("Invalid command");
             }

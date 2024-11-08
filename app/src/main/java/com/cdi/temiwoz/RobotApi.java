@@ -59,7 +59,16 @@ public class RobotApi implements TtsListener,
 
     private MainActivity activity;
 
+    private Camera mCamera;
+
+    private boolean isMoving = false;
+    private float currentX = 0;
+    private float currentY = 0;
+    private static final int MOVEMENT_INTERVAL = 500; // 500ms between commands
+    private Thread movementThread;
+
     RobotApi (Robot robotInstance, MainActivity activity) {
+        System.out.println("RobotApi: Initializing with robot instance: " + (robotInstance != null ? "valid" : "null"));
         this.robot = robotInstance;
         this.activity = activity;
         robot.addTtsListener(this);
@@ -309,6 +318,7 @@ public class RobotApi implements TtsListener,
     }
 
     public void stop() {
+        stopMoving();
         stopCamera(null); // 关闭摄像头
         //robot.removeTtsListener(this);
         //robot.removeAsrListener(this);
@@ -482,4 +492,73 @@ public class RobotApi implements TtsListener,
             });
         }
     }
+
+    /**
+     * 手动控制temi持续移动
+     * @param x 线速度,范围-1~1,正值前进,负值后退
+     * @param y 角速度,范围-1~1,正值左转,负值右转
+     */
+    public void skidJoy(float x, float y) {
+        System.out.println("RobotApi: Executing skidJoy - x: " + x + ", y: " + y);
+        
+        // 如果收到(0,0)，则停止移动
+        if (x == 0 && y == 0) {
+            stopMoving();
+            return;
+        }
+
+        currentX = x;
+        currentY = y;
+
+        // 如果已经在移动，不需要创建新线程
+        if (isMoving) {
+            return;
+        }
+
+        // 开始持续移动
+        isMoving = true;
+        movementThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (isMoving) {
+                    if (robot != null) {
+                        robot.skidJoy(currentX, currentY); // 移除 smart 参数
+                    }
+                    try {
+                        Thread.sleep(MOVEMENT_INTERVAL);
+                    } catch (InterruptedException e) {
+                        break;
+                    }
+                }
+            }
+        });
+        movementThread.start();
+    }
+
+    /**
+     * 停止移动
+     */
+    private void stopMoving() {
+        isMoving = false;
+        if (robot != null) {
+            robot.skidJoy(0, 0); // 移除 smart 参数
+        }
+        if (movementThread != null) {
+            movementThread.interrupt();
+            movementThread = null;
+        }
+    }
+
+    private void stopCamera(Void unused) {
+        if (mCamera != null) {
+            try {
+                mCamera.stopPreview();
+                mCamera.release();
+                mCamera = null;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
 }

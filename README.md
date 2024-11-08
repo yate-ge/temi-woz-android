@@ -139,6 +139,29 @@ All commands are sent as JSON objects. Here are the supported robot commands:
   - Success: `{"command":"goto", "id":"unique_command_id", "status":"completed", "location":"kitchen"}`
   - Failure: `{"command":"goto", "id":"unique_command_id", "status":"failed", "error":"Path blocked"}`
 
+#### Move Command
+```json
+{
+  "command": "move",
+  "x": 0.5,    // Linear velocity, range -1~1, positive=forward, negative=backward
+  "y": 0.5     // Angular velocity, range -1~1, positive=left turn, negative=right turn
+}
+```
+- Description: Controls continuous movement of the robot. The robot will keep moving at the specified velocity until a stop command is received or a new movement command is issued
+- To stop movement: Send a move command with x=0 and y=0
+```json
+{
+  "command": "move",
+  "x": 0,
+  "y": 0
+}
+```
+- Notes:
+  - x and y values are clamped to the range of -1 to 1
+  - Movement commands are sent every 500ms to maintain continuous movement
+  - New movement commands will update the current movement velocity
+  - Basic obstacle avoidance is handled by Temi's built-in safety features
+
 #### Stop Movement Command
 ```json
 {
