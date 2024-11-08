@@ -118,141 +118,53 @@ public class TemiWebsocketServer extends WebSocketServer {
                     robot.constraintBeWith();
                     break;
                 case "startCamera":
-                    activity.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            try {
-                                final String commandId = cmd.getString("id");
-                                if (!activity.isCameraOpen) {
-                                    activity.startCamera();
-                                }
-                                JSONObject result = new JSONObject();
-                                result.put("id", commandId);
-                                result.put("status", "success");
-                                conn.send("startCamera:" + result.toString());
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                                conn.send("startCamera:{\"error\":\"Invalid command format\"}");
-                            }
-                        }
-                    });
+                    try {
+                        robot.startCameraWithId(cmd.getString("id"));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
                     break;
                 case "stopCamera":
-                    activity.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            try {
-                                final String commandId = cmd.getString("id");
-                                activity.stopCamera();
-                                JSONObject result = new JSONObject();
-                                result.put("id", commandId);
-                                result.put("status", "success");
-                                conn.send("stopCamera:" + result.toString());
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                                conn.send("stopCamera:{\"error\":\"Invalid command format\"}");
-                            }
-                        }
-                    });
+                    try {
+                        robot.stopCameraWithId(cmd.getString("id"));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
                     break;
                 case "showCameraPreview":
-                    activity.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            try {
-                                final String commandId = cmd.getString("id");
-                                JSONObject result = new JSONObject();
-                                result.put("id", commandId);
-                                
-                                if (!activity.isCameraOpen) {
-                                    result.put("status", "error");
-                                    result.put("message", "Camera is not open");
-                                } else {
-                                    activity.showCamera();
-                                    result.put("status", "success");
-                                }
-                                conn.send("showCameraPreview:" + result.toString());
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                                conn.send("showCameraPreview:{\"error\":\"Invalid command format\"}");
-                            }
-                        }
-                    });
+                    try {
+                        robot.showCameraPreviewWithId(cmd.getString("id"));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
                     break;
                 case "hideCameraPreview":
-                    activity.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            try {
-                                final String commandId = cmd.getString("id");
-                                activity.hideCamera();
-                                JSONObject result = new JSONObject();
-                                result.put("id", commandId);
-                                result.put("status", "success");
-                                conn.send("hideCameraPreview:" + result.toString());
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                                conn.send("hideCameraPreview:{\"error\":\"Invalid command format\"}");
-                            }
-                        }
-                    });
+                    try {
+                        robot.hideCameraPreviewWithId(cmd.getString("id"));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
                     break;
                 case "takePicture":
-                    activity.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            try {
-                                final String commandId = cmd.getString("id");
-                                activity.takePictureForWebSocket(new MainActivity.PictureCallback() {
-                                    @Override
-                                    public void onPictureTaken(String base64Image, String imagePath) {
-                                        try {
-                                            JSONObject result = new JSONObject();
-                                            result.put("id", commandId);
-                                            result.put("path", imagePath);
-                                            result.put("imageData", base64Image);
-                                            conn.send("takePicture:" + result.toString());
-                                        } catch (JSONException e) {
-                                            e.printStackTrace();
-                                            conn.send("takePicture:{\"error\":\"JSON error\"}");
-                                        }
-                                    }
-
-                                    @Override
-                                    public void onError(String error) {
-                                        try {
-                                            JSONObject result = new JSONObject();
-                                            result.put("id", commandId);
-                                            result.put("error", error);
-                                            conn.send("takePicture:" + result.toString());
-                                        } catch (JSONException e) {
-                                            e.printStackTrace();
-                                            conn.send("takePicture:{\"error\":\"" + error + "\"}");
-                                        }
-                                    }
-                                });
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                                conn.send("takePicture:{\"error\":\"Invalid command format\"}");
-                            }
-                        }
-                    });
+                    try {
+                        robot.takePictureWithId(cmd.getString("id"));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
                     break;
                 case "startRecording":
-                    activity.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            activity.startRecording();
-                        }
-                    });
+                    try {
+                        robot.startRecordingWithId(cmd.getString("id"));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
                     break;
                 case "stopRecording":
-                    activity.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            activity.stopRecording();
-                        }
-                    });
+                    try {
+                        robot.stopRecordingWithId(cmd.getString("id"));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
                     break;
                 default:
                     System.out.println("Invalid command");

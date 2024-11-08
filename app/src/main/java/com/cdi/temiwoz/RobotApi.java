@@ -319,67 +319,167 @@ public class RobotApi implements TtsListener,
         this.surfaceHolder = holder;
     }
 
-    public void startCamera(String id) {
+    public void startCameraWithId(final String id) {
         if (activity != null) {
             activity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    activity.showCamera();
+                    if (!activity.isCameraOpen) {
+                        activity.startCamera();
+                    }
+                    try {
+                        JSONObject result = new JSONObject();
+                        result.put("id", id);
+                        result.put("status", "success");
+                        server.broadcast("startCamera:" + result.toString());
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        server.broadcast("startCamera:{\"error\":\"Invalid command format\"}");
+                    }
                 }
             });
-            try {
-                server.broadcast(new JSONObject()
-                        .put("event", "cameraStarted")
-                        .put("id", id)
-                        .put("success", true)
-                        .toString());
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
         }
     }
 
-    public void stopCamera(String id) {
+    public void stopCameraWithId(final String id) {
         if (activity != null) {
             activity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    activity.showWebView();
+                    activity.stopCamera();
+                    try {
+                        JSONObject result = new JSONObject();
+                        result.put("id", id);
+                        result.put("status", "success");
+                        server.broadcast("stopCamera:" + result.toString());
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        server.broadcast("stopCamera:{\"error\":\"Invalid command format\"}");
+                    }
                 }
             });
-            try {
-                server.broadcast(new JSONObject()
-                        .put("event", "cameraStopped")
-                        .put("id", id)
-                        .put("success", true)
-                        .toString());
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
         }
     }
 
-    // 添加拍照完成后的 WebSocket 通知
-    public void notifyPictureTaken(String filePath) {
-        try {
-            server.broadcast(new JSONObject()
-                    .put("event", "pictureTaken")
-                    .put("filePath", filePath)
-                    .toString());
-        } catch (JSONException e) {
-            e.printStackTrace();
+    public void showCameraPreviewWithId(final String id) {
+        if (activity != null) {
+            activity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        JSONObject result = new JSONObject();
+                        result.put("id", id);
+                        
+                        if (!activity.isCameraOpen) {
+                            result.put("status", "error");
+                            result.put("message", "Camera is not open");
+                        } else {
+                            activity.showCamera();
+                            result.put("status", "success");
+                        }
+                        server.broadcast("showCameraPreview:" + result.toString());
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        server.broadcast("showCameraPreview:{\"error\":\"Invalid command format\"}");
+                    }
+                }
+            });
         }
     }
 
-    // 添加录像完成后的 WebSocket 通知
-    public void notifyRecordingStopped(String filePath) {
-        try {
-            server.broadcast(new JSONObject()
-                    .put("event", "recordingStopped")
-                    .put("filePath", filePath)
-                    .toString());
-        } catch (JSONException e) {
-            e.printStackTrace();
+    public void hideCameraPreviewWithId(final String id) {
+        if (activity != null) {
+            activity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    activity.hideCamera();
+                    try {
+                        JSONObject result = new JSONObject();
+                        result.put("id", id);
+                        result.put("status", "success");
+                        server.broadcast("hideCameraPreview:" + result.toString());
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        server.broadcast("hideCameraPreview:{\"error\":\"Invalid command format\"}");
+                    }
+                }
+            });
+        }
+    }
+
+    public void takePictureWithId(final String id) {
+        if (activity != null) {
+            activity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    activity.takePictureForWebSocket(new MainActivity.PictureCallback() {
+                        @Override
+                        public void onPictureTaken(String base64Image, String imagePath) {
+                            try {
+                                JSONObject result = new JSONObject();
+                                result.put("id", id);
+                                result.put("path", imagePath);
+                                result.put("imageData", base64Image);
+                                server.broadcast("takePicture:" + result.toString());
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                                server.broadcast("takePicture:{\"error\":\"JSON error\"}");
+                            }
+                        }
+
+                        @Override
+                        public void onError(String error) {
+                            try {
+                                JSONObject result = new JSONObject();
+                                result.put("id", id);
+                                result.put("error", error);
+                                server.broadcast("takePicture:" + result.toString());
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                                server.broadcast("takePicture:{\"error\":\"" + error + "\"}");
+                            }
+                        }
+                    });
+                }
+            });
+        }
+    }
+
+    public void startRecordingWithId(final String id) {
+        if (activity != null) {
+            activity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    activity.startRecording();
+                    try {
+                        JSONObject result = new JSONObject();
+                        result.put("id", id);
+                        result.put("status", "success");
+                        server.broadcast("startRecording:" + result.toString());
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+        }
+    }
+
+    public void stopRecordingWithId(final String id) {
+        if (activity != null) {
+            activity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    activity.stopRecording();
+                    try {
+                        JSONObject result = new JSONObject();
+                        result.put("id", id);
+                        result.put("status", "success");
+                        server.broadcast("stopRecording:" + result.toString());
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
         }
     }
 }
