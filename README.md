@@ -144,31 +144,7 @@ All commands are sent as JSON objects. Here are the supported robot commands:
 ```
 - Description: Loads a web interface on Temi's screen
 
-#### Response Format
 
-Temi sends responses in the following formats:
-
-1. Text-to-Speech (TTS) completion:
-```
-TTS_COMPLETED/spoken_sentence
-```
-
-2. Speech Recognition (ASR) completion:
-```
-ASR_COMPLETED/recognized_text
-```
-
-3. Navigation status:
-```
-GOTO_COMPLETED/location_name
-GOTO_ABORTED/error_message
-```
-
-4. System status:
-```
-ROBOT_READY
-ERROR/error_message
-```
 
 ### Using Node-RED
 
@@ -183,7 +159,9 @@ Feel free to submit issues and enhancement requests!
 
 ## License
 
-[Add your license information here]
+MIT License
+
+Copyright (c) 2024 CDI Lab
 
 ## Acknowledgments
 
