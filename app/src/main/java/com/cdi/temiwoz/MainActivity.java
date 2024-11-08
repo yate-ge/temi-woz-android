@@ -31,13 +31,19 @@ import java.util.Map;
 
 import android.content.DialogInterface;
 import androidx.appcompat.app.AlertDialog;
+import android.media.MediaRecorder;
+import android.graphics.Bitmap;
+import android.os.Environment;
+import java.io.File;
+import java.io.FileOutputStream;
+import android.util.Base64;
 
 public class MainActivity extends AppCompatActivity implements OnRobotReadyListener, SurfaceHolder.Callback {
 
     private static final String TAG = "MainActivity";
     private Robot robot;
     private RobotApi robotApi;
-    private Camera camera;
+    Camera camera;
     private SurfaceView surfaceView;
     private SurfaceHolder surfaceHolder;
     TemiWebsocketServer server;
@@ -51,6 +57,15 @@ public class MainActivity extends AppCompatActivity implements OnRobotReadyListe
         Manifest.permission.RECORD_AUDIO,
         Manifest.permission.WRITE_EXTERNAL_STORAGE
     };
+
+    // 在类定义中添加接口
+    public interface PictureCallback {
+        void onPictureTaken(String base64Image, String imagePath);
+        void onError(String error);
+    }
+
+    private View cameraIndicator;
+    public boolean isCameraOpen = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,13 +92,7 @@ public class MainActivity extends AppCompatActivity implements OnRobotReadyListe
         robotApi = new RobotApi(robot, this);// 传入MainActivity实例
         robotApi.setSurfaceHolder(surfaceHolder);
 
-        // 添加截图按钮的点击事件
-        findViewById(R.id.screenshot_button).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                takeScreenshot();
-            }
-        });
+        cameraIndicator = findViewById(R.id.camera_indicator);
     }
 
     private void checkPermissions() {
@@ -201,60 +210,31 @@ public class MainActivity extends AppCompatActivity implements OnRobotReadyListe
     ////////////////////////////////////////////////////////////////
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
-        Log.d(TAG, "surfaceCreated: Surface created");
         startCamera();
     }
 
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-        Log.d(TAG, "surfaceChanged: Surface changed. Width: " + width + ", Height: " + height);
-        if (surfaceHolder.getSurface() == null) {
-            Log.e(TAG, "surfaceChanged: No valid surface");
+        if (holder.getSurface() == null) {
             return;
         }
 
         try {
             camera.stopPreview();
         } catch (Exception e) {
-            Log.e(TAG, "surfaceChanged: Error stopping preview", e);
+            // 忽略预览没有开始的情况
         }
 
         try {
-            Camera.Parameters parameters = camera.getParameters();
-            Camera.Size previewSize = getBestPreviewSize(width, height, parameters);
-            if (previewSize != null) {
-                parameters.setPreviewSize(previewSize.width, previewSize.height);
-                Log.d(TAG, "surfaceChanged: Setting preview size to " + previewSize.width + "x" + previewSize.height);
-            }
-            
-            // 设置摄像头方向
-            setCameraDisplayOrientation();
-            
-            camera.setParameters(parameters);//设置摄像头参数   
-            camera.setPreviewDisplay(surfaceHolder);//设置预览显示
-            camera.startPreview();//开始预览
-            Log.d(TAG, "surfaceChanged: Camera preview started");
+            camera.setPreviewDisplay(holder);
+            camera.startPreview();
         } catch (Exception e) {
-            Log.e(TAG, "surfaceChanged: Error starting camera preview", e);
+            Log.e(TAG, "surfaceChanged: Error starting camera preview: " + e.getMessage());
         }
-    }
-
-    private Camera.Size getBestPreviewSize(int width, int height, Camera.Parameters parameters) {
-        Camera.Size bestSize = null;
-        List<Camera.Size> sizeList = parameters.getSupportedPreviewSizes();//获取支持的预览尺寸
-        bestSize = sizeList.get(0);
-        for(int i = 1; i < sizeList.size(); i++){
-            if((sizeList.get(i).width * sizeList.get(i).height) > (bestSize.width * bestSize.height)){
-                bestSize = sizeList.get(i);
-            }
-        }
-        Log.d(TAG, "getBestPreviewSize: Best size: " + bestSize.width + "x" + bestSize.height);
-        return bestSize;
     }
 
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
-        Log.d(TAG, "surfaceDestroyed: Surface destroyed");
         stopCamera();
     }
 
@@ -265,9 +245,15 @@ public class MainActivity extends AppCompatActivity implements OnRobotReadyListe
                 camera = Camera.open();
                 camera.setPreviewDisplay(surfaceHolder);
                 camera.startPreview();
-                Log.d(TAG, "startCamera: Camera preview started");
+                setCameraDisplayOrientation();
+                isCameraOpen = true;
+                cameraIndicator.setVisibility(View.VISIBLE);
+                surfaceView.setVisibility(View.GONE);
+                Log.d(TAG, "startCamera: Camera started");
             } catch (IOException e) {
                 Log.e(TAG, "startCamera: Failed to start camera", e);
+                isCameraOpen = false;
+                cameraIndicator.setVisibility(View.GONE);
             }
         }
     }
@@ -279,6 +265,8 @@ public class MainActivity extends AppCompatActivity implements OnRobotReadyListe
                 camera.stopPreview();
                 camera.release();
                 camera = null;
+                isCameraOpen = false;
+                cameraIndicator.setVisibility(View.GONE);
                 Log.d(TAG, "stopCamera: Camera stopped and released");
             } catch (Exception e) {
                 Log.e(TAG, "stopCamera: Error stopping camera", e);
@@ -316,9 +304,11 @@ public class MainActivity extends AppCompatActivity implements OnRobotReadyListe
 
     // 添加切换显示的方法
     public void showCamera() {
+        if (!isCameraOpen) {
+            return;
+        }
         webView.setVisibility(View.GONE);
         surfaceView.setVisibility(View.VISIBLE);
-        initializeCamera();
     }
 
     public void showWebView() {
@@ -374,7 +364,7 @@ public class MainActivity extends AppCompatActivity implements OnRobotReadyListe
     }
 
     // 添加录像功能
-    private void startRecording() {
+    public void startRecording() {
         if (camera == null) {
             camera = Camera.open();
         }
@@ -402,7 +392,7 @@ public class MainActivity extends AppCompatActivity implements OnRobotReadyListe
         }
     }
 
-    private void stopRecording() {
+    public void stopRecording() {
         if (isRecording) {
             mediaRecorder.stop();
             mediaRecorder.release();
@@ -412,5 +402,45 @@ public class MainActivity extends AppCompatActivity implements OnRobotReadyListe
             Log.d(TAG, "stopRecording: Recording stopped");
             Toast.makeText(this, "Recording stopped", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    // 添加公共方法
+    public void takePictureForWebSocket(final PictureCallback callback) {
+        if (camera != null) {
+            camera.takePicture(null, null, new Camera.PictureCallback() {
+                @Override
+                public void onPictureTaken(byte[] data, Camera camera) {
+                    try {
+                        // 保存图片文件
+                        File pictureFile = new File(
+                            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
+                            "temi_photo_" + System.currentTimeMillis() + ".jpg"
+                        );
+                        FileOutputStream fos = new FileOutputStream(pictureFile);
+                        fos.write(data);
+                        fos.close();
+
+                        // 转换为 Base64
+                        String base64Image = Base64.encodeToString(data, Base64.DEFAULT);
+                        
+                        // 回调成功
+                        callback.onPictureTaken(base64Image, pictureFile.getAbsolutePath());
+                        
+                        // 重启预览
+                        camera.startPreview();
+                    } catch (Exception e) {
+                        callback.onError("Failed to process image: " + e.getMessage());
+                    }
+                }
+            });
+        } else {
+            callback.onError("Camera is not available");
+        }
+    }
+
+    // 修改隐藏摄像头画面的方法
+    public void hideCamera() {
+        surfaceView.setVisibility(View.GONE);
+        webView.setVisibility(View.VISIBLE);
     }
 }
