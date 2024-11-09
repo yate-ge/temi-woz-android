@@ -31,6 +31,8 @@ import org.json.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.webkit.WebView;
+import android.webkit.WebSettings;
 
 public class RobotApi implements TtsListener,
                                  AsrListener,
@@ -102,7 +104,12 @@ public class RobotApi implements TtsListener,
         boolean finished = robot.saveLocation(location);
 
         try {
-            server.broadcast(new JSONObject().put("deleteLocation",finished).toString());
+            server.broadcast(new JSONObject()
+                .put("command", "deleteLocation")
+                .put("id", id)
+                .put("status", "completed")
+                .put("location", location)
+                .toString());
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -184,7 +191,25 @@ public class RobotApi implements TtsListener,
         robot.setDetectionModeOn(on);
         System.out.println("set detection mode on");
         try {
-            server.broadcast(new JSONObject().put("detection mode", on).toString());
+            server.broadcast(new JSONObject()
+                .put("command", "setDetectionMode")
+                .put("id", id)
+                .put("status", "completed")
+                .put("isOn", on)
+                .toString());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void checkDetectionMode(String id){
+        boolean isDetectionModeOn = robot.isDetectionModeOn();
+        try {
+            server.broadcast(new JSONObject()
+                .put("command", "checkDetectionMode")
+                .put("id", id)
+                .put("isOn", isDetectionModeOn)
+                .toString());
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -196,22 +221,16 @@ public class RobotApi implements TtsListener,
         robot.setTrackUserOn(on);
         System.out.println("set track user mode on");
         try {
-            server.broadcast(new JSONObject().put("track user mode", on).toString());
+            server.broadcast(new JSONObject()
+                .put("command", "setTrackUserOn")
+                .put("id", id)
+                .put("status", "success")
+                .toString());
         } catch (JSONException e) {
             e.printStackTrace();
         }
     }
 
-    public void checkDetectionMode(String id){
-        boolean isDetectionModeOn = robot.isDetectionModeOn();
-        try {
-            server.broadcast(new JSONObject().put("CheckDetectionState:", isDetectionModeOn).toString());
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-    }
-    
     public void beWithMe(){
         robot.beWithMe();
     }
@@ -357,12 +376,20 @@ public class RobotApi implements TtsListener,
                     }
                     try {
                         JSONObject result = new JSONObject();
+                        result.put("command", "startCamera");
                         result.put("id", id);
                         result.put("status", "success");
-                        server.broadcast("startCamera:" + result.toString());
+                        server.broadcast(result.toString());
                     } catch (JSONException e) {
                         e.printStackTrace();
-                        server.broadcast("startCamera:{\"error\":\"Invalid command format\"}");
+                        try {
+                            JSONObject error = new JSONObject();
+                            error.put("command", "startCamera");
+                            error.put("error", "Invalid command format");
+                            server.broadcast(error.toString());
+                        } catch (JSONException ex) {
+                            ex.printStackTrace();
+                        }
                     }
                 }
             });
@@ -377,12 +404,12 @@ public class RobotApi implements TtsListener,
                     activity.stopCamera();
                     try {
                         JSONObject result = new JSONObject();
+                        result.put("command", "stopCamera");
                         result.put("id", id);
                         result.put("status", "success");
-                        server.broadcast("stopCamera:" + result.toString());
+                        server.broadcast(result.toString());
                     } catch (JSONException e) {
                         e.printStackTrace();
-                        server.broadcast("stopCamera:{\"error\":\"Invalid command format\"}");
                     }
                 }
             });
@@ -396,6 +423,7 @@ public class RobotApi implements TtsListener,
                 public void run() {
                     try {
                         JSONObject result = new JSONObject();
+                        result.put("command", "showCameraPreview");
                         result.put("id", id);
                         
                         if (!activity.isCameraOpen) {
@@ -405,10 +433,9 @@ public class RobotApi implements TtsListener,
                             activity.showCamera();
                             result.put("status", "success");
                         }
-                        server.broadcast("showCameraPreview:" + result.toString());
+                        server.broadcast(result.toString());
                     } catch (JSONException e) {
                         e.printStackTrace();
-                        server.broadcast("showCameraPreview:{\"error\":\"Invalid command format\"}");
                     }
                 }
             });
@@ -423,12 +450,12 @@ public class RobotApi implements TtsListener,
                     activity.hideCamera();
                     try {
                         JSONObject result = new JSONObject();
+                        result.put("command", "hideCameraPreview");
                         result.put("id", id);
                         result.put("status", "success");
-                        server.broadcast("hideCameraPreview:" + result.toString());
+                        server.broadcast(result.toString());
                     } catch (JSONException e) {
                         e.printStackTrace();
-                        server.broadcast("hideCameraPreview:{\"error\":\"Invalid command format\"}");
                     }
                 }
             });
@@ -445,13 +472,13 @@ public class RobotApi implements TtsListener,
                         public void onPictureTaken(String base64Image, String imagePath) {
                             try {
                                 JSONObject result = new JSONObject();
+                                result.put("command", "takePicture");
                                 result.put("id", id);
                                 result.put("path", imagePath);
                                 result.put("imageData", base64Image);
-                                server.broadcast("takePicture:" + result.toString());
+                                server.broadcast(result.toString());
                             } catch (JSONException e) {
                                 e.printStackTrace();
-                                server.broadcast("takePicture:{\"error\":\"JSON error\"}");
                             }
                         }
 
@@ -459,12 +486,12 @@ public class RobotApi implements TtsListener,
                         public void onError(String error) {
                             try {
                                 JSONObject result = new JSONObject();
+                                result.put("command", "takePicture");
                                 result.put("id", id);
                                 result.put("error", error);
-                                server.broadcast("takePicture:" + result.toString());
+                                server.broadcast(result.toString());
                             } catch (JSONException e) {
                                 e.printStackTrace();
-                                server.broadcast("takePicture:{\"error\":\"" + error + "\"}");
                             }
                         }
                     });
@@ -481,9 +508,10 @@ public class RobotApi implements TtsListener,
                     activity.startRecording();
                     try {
                         JSONObject result = new JSONObject();
+                        result.put("command", "startRecording");
                         result.put("id", id);
                         result.put("status", "success");
-                        server.broadcast("startRecording:" + result.toString());
+                        server.broadcast(result.toString());
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -500,9 +528,10 @@ public class RobotApi implements TtsListener,
                     activity.stopRecording();
                     try {
                         JSONObject result = new JSONObject();
+                        result.put("command", "stopRecording");
                         result.put("id", id);
                         result.put("status", "success");
-                        server.broadcast("stopRecording:" + result.toString());
+                        server.broadcast(result.toString());
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -517,9 +546,6 @@ public class RobotApi implements TtsListener,
      * @param y 角速度,范围-1~1,正值左转,负值右转
      */
     public void skidJoy(float x, float y) {
-        System.out.println("RobotApi: Executing skidJoy - x: " + x + ", y: " + y);
-        
-        // 如果收到(0,0)，则停止移动
         if (x == 0 && y == 0) {
             stopMoving();
             try {
@@ -538,7 +564,6 @@ public class RobotApi implements TtsListener,
         currentX = x;
         currentY = y;
 
-        // 如果已经在移动，只更新速度值
         if (isMoving) {
             try {
                 server.broadcast(new JSONObject()
@@ -553,7 +578,6 @@ public class RobotApi implements TtsListener,
             return;
         }
 
-        // 开始持续移动
         isMoving = true;
         try {
             server.broadcast(new JSONObject()
@@ -617,6 +641,40 @@ public class RobotApi implements TtsListener,
             } catch (Exception e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+
+
+    // 添加新的方法来处理界面加载
+    public void display(final String url, final String commandId) {
+        if (activity != null) {
+            activity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        WebView webView = activity.findViewById(R.id.webview);
+                        if (webView != null) {
+                            // 配置WebView设置
+                            WebSettings webSettings = webView.getSettings();
+                            webSettings.setJavaScriptEnabled(true);
+                            
+                            // 加载URL
+                            webView.loadUrl(url);
+                            
+                            // 发送成功响应
+                            JSONObject response = new JSONObject();
+                            response.put("command", "display");
+                            response.put("id", commandId);
+                            response.put("status", "loaded");
+                            
+                            server.broadcast(response.toString());
+                        }
+                    } catch (JSONException e) {
+                        Log.e(TAG, "Error creating response: " + e.getMessage());
+                    }
+                }
+            });
         }
     }
 

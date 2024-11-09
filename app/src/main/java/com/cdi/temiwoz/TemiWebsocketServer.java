@@ -69,6 +69,9 @@ public class TemiWebsocketServer extends WebSocketServer {
             final JSONObject cmd = new JSONObject(message);
 
             switch (cmd.getString("command")) {
+                case "display":
+                    robot.display(cmd.getString("url"), cmd.getString("id"));
+                    break;
                 case "speak":
                     robot.speak(cmd.getString("sentence"), cmd.getString("id"));
                     break;

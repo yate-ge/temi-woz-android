@@ -269,7 +269,14 @@ All commands are sent as JSON objects. Here are the supported robot commands:
 }
 ```
 - Description: Makes robot follow the user
-- WebSocket Response: `{"command":"beWithMe", "id":"unique_command_id", "status":"following"}`
+- WebSocket Response: 
+```json
+{
+  "command": "beWithMe",
+  "id": "unique_command_id", 
+  "status": "following"
+}
+```
 
 #### Constraint Be With Command
 ```json
@@ -279,7 +286,14 @@ All commands are sent as JSON objects. Here are the supported robot commands:
 }
 ```
 - Description: Makes robot follow with constraints
-- WebSocket Response: `{"command":"constraintBeWith", "id":"unique_command_id", "status":"following"}`
+- WebSocket Response: 
+```json
+{
+  "command": "constraintBeWith",
+  "id": "unique_command_id", 
+  "status": "following"
+}
+```
 
 ### Location Management Commands
 
@@ -297,7 +311,7 @@ All commands are sent as JSON objects. Here are the supported robot commands:
 {
   "command": "saveLocation",
   "id": "unique_command_id",
-  "status": "completed/failed",
+  "status": "completed",
   "location": "kitchen"
 }
 ```
@@ -316,7 +330,7 @@ All commands are sent as JSON objects. Here are the supported robot commands:
 {
   "command": "deleteLocation",
   "id": "unique_command_id",
-  "status": "completed/failed",
+  "status": "completed",
   "location": "kitchen"
 }
 ```
@@ -331,7 +345,14 @@ All commands are sent as JSON objects. Here are the supported robot commands:
 }
 ```
 - Description: Controls camera operations
-- WebSocket Response: `{"command":"startCamera", "id":"unique_command_id", "status":"started"}`
+- WebSocket Response: 
+```json
+{
+  "command": "startCamera",
+  "id": "unique_command_id",
+  "status": "success"
+}
+```
 
 #### Take Picture Command
 ```json
@@ -341,7 +362,22 @@ All commands are sent as JSON objects. Here are the supported robot commands:
 }
 ```
 - Description: Takes a picture using robot's camera
-- WebSocket Response: `{"command":"takePicture", "id":"unique_command_id", "image":"base64_encoded_image"}`
+- WebSocket Response: 
+```json
+{
+  "command": "takePicture",
+  "id": "unique_command_id",
+  "path": "image_file_path",
+  "imageData": "base64_encoded_image"
+}
+```
+- Error Response:
+```json
+{
+  "id": "unique_command_id", 
+  "error": "error_message"
+}
+```
 
 #### Recording Commands
 ```json
@@ -351,7 +387,14 @@ All commands are sent as JSON objects. Here are the supported robot commands:
 }
 ```
 - Description: Controls video recording
-- WebSocket Response: `{"command":"startRecording", "id":"unique_command_id", "status":"started"}`
+- WebSocket Response:
+```json
+{
+  "command": "startRecording", // or "stopRecording"
+  "id": "unique_command_id",
+  "status": "success"
+}
+```
 
 ### Detection and Tracking Commands
 
@@ -387,7 +430,6 @@ All commands are sent as JSON objects. Here are the supported robot commands:
 {
   "command": "checkDetectionMode",
   "id": "unique_command_id",
-  "status": "completed",
   "isOn": true
 }
 ```
@@ -401,7 +443,33 @@ All commands are sent as JSON objects. Here are the supported robot commands:
 }
 ```
 - Description: Enables or disables user tracking
-- WebSocket Response: `{"command":"setTrackUserOn", "id":"unique_command_id", "status":"set"}`
+- WebSocket Response: 
+```json
+{
+  "command": "setTrackUserOn",
+  "id": "unique_command_id",
+  "status": "success"
+}
+```
+
+#### Movement Command
+```json
+{
+  "command": "move",
+  "x": 0.5,
+  "y": 0.5
+}
+```
+- Description: Controls continuous movement of the robot
+- WebSocket Response: 
+```json
+{
+  "command": "move",
+  "status": "started|updated|stopped",
+  "x": 0.5,
+  "y": 0.5
+}
+```
 
 ### System Commands
 
@@ -438,18 +506,18 @@ All commands are sent as JSON objects. Here are the supported robot commands:
 - Description: Initiates a call to specified user
 - WebSocket Response: `{"command":"call", "id":"unique_command_id", "status":"initiated"}`
 
-### Interface Commands
+### Screen Commands
 
-#### Load Interface Command
+#### Load Screen Command
 ```json
 {
-  "command": "interface",
+  "command": "display",
   "url": "URL_TO_LOAD",
-  "id": "unique_command_id" 
+  "id": "unique_command_id"
 }
 ```
-- Description: Loads a web interface on Temi's screen
-- WebSocket Response: `{"command":"interface", "id":"unique_command_id", "status":"loaded"}`
+- Description: Loads a web page on Temi's screen
+- WebSocket Response: `{"command":"display", "id":"unique_command_id", "status":"loaded"}`
 
 ### Using Node-RED
 
