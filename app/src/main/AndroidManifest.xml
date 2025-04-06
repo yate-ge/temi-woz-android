@@ -20,6 +20,7 @@
 
         <meta-data android:name="com.robotemi.sdk.metadata.KIOSK" android:value="TRUE" />
         <meta-data android:name="@string/metadata_kiosk" android:value="TRUE" />
+        <meta-data android:name="@string/metadata_override_stt" android:value="true" />
         <meta-data android:name="@string/metadata_override_nlu" android:value="TRUE" />
 
         <meta-data
