@@ -67,7 +67,3 @@ fastlane/test_output
 fastlane/readme.md
 
 *.DS_Store
-
-nls-example-transcriber/
-
-config.properties
